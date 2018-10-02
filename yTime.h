@@ -1,7 +1,14 @@
 #ifndef TIME_H
 #define TIME_H
 
+#define MAX_SECONDS 2678400 // 30 days in seconds
+#define seconds() (MyMillis()/1000)
+
 #include <time.h> 
+
+unsigned long bootupUnixTime = 0;
+unsigned long secondsPassedFromBootup = 0;
+unsigned long startupMillis = 0;
 
 void deleteActions(int upToIndex){
   int newSize = numActions - upToIndex -1;
@@ -37,31 +44,55 @@ void initTime(){
     LCDwrite(".",true);
     delay(1000);
   }
-  Serial.println("");
-  time(nullptr);
+  Serial.println(""); 
+  bootupUnixTime = time(nullptr);
 }
 
-void getTime(int &year,int &month,int &day,int& hour, int& minute){
-  do{
-    time_t now = time(NULL);
-    struct tm * ptm = gmtime(&now);
-    year = ptm->tm_year + 1900;
-    month = ptm->tm_mon + 1;
-    day = ptm->tm_mday;
-    hour = ptm->tm_hour;
-    minute = ptm->tm_min;
-    debug("getTime: currentYear="+String(year));
-  }while(year < 2018);
+unsigned long MyMillis(){
+  return millis() - startupMillis;
+}
+
+
+
+//DateTimeContainer getUnixTimeOnline(){
+//    DateTimeContainer t;
+//    time_t now;
+//    struct tm * ptm;
+//  do{
+//    now = time(NULL);
+//    ptm = gmtime(&now);
+//    t.selectedYear = ptm->tm_year + 1900;
+//    t.selectedMonth = ptm->tm_mon + 1;
+//    t.selectedDay = ptm->tm_mday;
+//    t.selectedHour = ptm->tm_hour;
+//    t.selectedMin = ptm->tm_min;
+//    debug("getTime: currentYear="+String(t.selectedYear));
+//  }while(t.selectedYear < 2018);
+//  bootupUnixTime = now;
+//  return t;
+//}
+
+DateTimeContainer getTime(){
+  if(seconds() > MAX_SECONDS){ // if overflow is about to occour
+    bootupUnixTime += seconds(); // startupTime is set to current time;
+    startupMillis = MyMillis(); // set startup millis as now so the difference is 0; 
+  }
+  time_t now = bootupUnixTime + seconds();
+  struct tm * ptm = gmtime(&now);
+  DateTimeContainer t;
+  t.selectedYear = ptm->tm_year + 1900;
+  t.selectedMonth = ptm->tm_mon + 1;
+  t.selectedDay = ptm->tm_mday;
+  t.selectedHour = ptm->tm_hour;
+  t.selectedMin = ptm->tm_min;
+  return t;
 }
 
 
 
 void checkTime(){
   Serial.print("checking for time ");
-  //LCDwrite("CHECKING TIMES..");
-  int year,month,day,hour,minute;
-  getTime(year,month,day,hour,minute);
-  DateTimeContainer current(year,month,day,hour,minute);
+  DateTimeContainer current = getTime();
   debug("current Time="+current.toString());
   // if its the time to do this.
   for(int i=numActions-1;i>=0;--i){

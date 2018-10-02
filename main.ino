@@ -1,10 +1,11 @@
 #define forl(x) for(int i=0; i<x ; ++i)
 
+
 #ifndef UNIT_TEST
 #include <Arduino.h>
 #endif
 
-#include "yHidden";
+#include "yHidden.h";
 #include "DateTimeContainer.h"
 #include "yGlobals.h"
 #include "yDebug.h"
@@ -18,7 +19,6 @@
 
 ///////////TIME MANAGMENT/////////////
 unsigned long prevMillis = 0,currentMillis;
-unsigned long
 //////////////////////////////////////
 
 void setup() {
@@ -48,7 +48,21 @@ void loop() {
       checkTime();  
       printAcDataToLCD();
   }
-  //debug("before hanldeClient");
-  server.handleClient();
-  //debug("after hanldeClient");
+  if(WiFi.status() != WL_CONNECTED){
+    if(!reconnecting){
+      reconnecting = true;
+      Serial.println("WiFi disconnected, reconnecting...");
+      lcd.clear();
+      lcd.print("reconnecting to");
+      lcd.setCursor(4,1);
+      lcd.print("WiFi");
+    }
+    WiFi.begin(ssid, password);
+  }
+  else {
+    if(reconnecting)
+      reconnecting = false;
+    server.handleClient();
+  }
+
 }

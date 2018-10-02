@@ -7,16 +7,18 @@
 
 /////////////WIFI/////////////
 
-void settingUpStaticIP(){
-  // config static IP
-  IPAddress ip(192, 168, 1, 200); // where xx is the desired IP Address
-  IPAddress gateway(192, 168, 1, 1); // set gateway to match your network
-  Serial.print(F("Setting static ip to : "));
-  Serial.println(ip);
-  IPAddress subnet(255, 255, 255, 0); // set subnet mask to match your network
-  WiFi.config(ip, gateway, subnet);
-}
+//void settingUpStaticIP(){
+//  // config static IP
+//  IPAddress ip(192, 168, 1, 200); // where xx is the desired IP Address
+//  IPAddress gateway(192, 168, 1, 1); // set gateway to match your network
+//  Serial.print(F("Setting static ip to : "));
+//  Serial.println(ip);
+//  IPAddress subnet(255, 255, 255, 0); // set subnet mask to match your network
+//  WiFi.config(ip, gateway, subnet);
+//}
 
+
+bool reconnecting = false;
 
 void connectToWiFi(){
   //settingUpStaticIP();
