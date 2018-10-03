@@ -5,6 +5,11 @@
 #define seconds() (MyMillis()/1000)
 
 #include <time.h> 
+#include <WiFiUdp.h>
+#include <NTPClient.h>
+
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "109.226.40.40", 3600, 0);
 
 unsigned long bootupUnixTime = 0;
 unsigned long secondsPassedFromBootup = 0;
@@ -31,21 +36,66 @@ void deleteActions(int upToIndex){
   numActions = newSize;
 }
 
+
+DateTimeContainer getUnixTimeOnline(){
+  DateTimeContainer t;
+  unsigned long currentUnix = 0;
+  do{
+    time_t now = time(NULL);
+    struct tm * ptm = gmtime(&now);
+    t.selectedYear = ptm->tm_year + 1900;
+    t.selectedMonth = ptm->tm_mon + 1;
+    t.selectedDay = ptm->tm_mday;
+    t.selectedHour = ptm->tm_hour;
+    t.selectedMin = ptm->tm_min;
+    debug("getTime: currentYear="+String(t.selectedYear));
+    currentUnix = now;
+  }while(t.selectedYear < 2018);
+  bootupUnixTime = currentUnix;
+  return t;
+}
+
+DateTimeContainer unixTimeToDateTime(unsigned long unixtime){
+  DateTimeContainer t;
+  time_t now = unixtime;
+  struct tm * ptm = gmtime(&now);
+  t.selectedYear = ptm->tm_year + 1900;
+  t.selectedMonth = ptm->tm_mon + 1;
+  t.selectedDay = ptm->tm_mday;
+  t.selectedHour = ptm->tm_hour;
+  t.selectedMin = ptm->tm_min;
+  return t;
+}
+
 void initTime(){
   //configTime(3 * 3600, 0, "gr.pool.ntp.org", "de.pool.ntp.org","time.nist.gov");
   // il.pool.ntp.org - 109.226.40.40
   // gr.pool.ntp.org - 178.128.126.226, 195.167.30.249
   // time.nist.gov - 132.163.96.1
-  configTime(3 * 3600, 0, "109.226.40.40", "178.128.126.226","132.163.96.1");
+  //configTime(3 * 3600, 0, "109.226.40.40", "178.128.126.226","132.163.96.1");
   Serial.print("\nWaiting for time");
   LCDwrite("Waiting for time");
-  while (!time(nullptr)) {
-    Serial.print(".");
-    LCDwrite(".",true);
-    delay(1000);
-  }
-  Serial.println(""); 
-  bootupUnixTime = time(nullptr);
+//  while (!time(nullptr)) {
+//    Serial.print(".");
+//    LCDwrite(".",true);
+//    delay(1000);
+//  }
+  timeClient.begin();
+  DateTimeContainer current;
+  do{
+    timeClient.forceUpdate();
+    bootupUnixTime = timeClient.getEpochTime();
+    current = unixTimeToDateTime(bootupUnixTime);
+    debug("bootupUnixTime="+String(bootupUnixTime));
+    debug("current Time="+current.toString());
+  }while(current.selectedYear < 2018);
+  
+  timeClient.end();
+  Serial.println("");
+
+  //bootupUnixTime = time(nullptr);
+  //debug("current Time="+String(time(0)));
+  //getUnixTimeOnline();
 }
 
 unsigned long MyMillis(){
@@ -54,25 +104,10 @@ unsigned long MyMillis(){
 
 
 
-//DateTimeContainer getUnixTimeOnline(){
-//    DateTimeContainer t;
-//    time_t now;
-//    struct tm * ptm;
-//  do{
-//    now = time(NULL);
-//    ptm = gmtime(&now);
-//    t.selectedYear = ptm->tm_year + 1900;
-//    t.selectedMonth = ptm->tm_mon + 1;
-//    t.selectedDay = ptm->tm_mday;
-//    t.selectedHour = ptm->tm_hour;
-//    t.selectedMin = ptm->tm_min;
-//    debug("getTime: currentYear="+String(t.selectedYear));
-//  }while(t.selectedYear < 2018);
-//  bootupUnixTime = now;
-//  return t;
-//}
+
 
 DateTimeContainer getTime(){
+  debug("getTime: seconds="+String(seconds()));
   if(seconds() > MAX_SECONDS){ // if overflow is about to occour
     bootupUnixTime += seconds(); // startupTime is set to current time;
     startupMillis = MyMillis(); // set startup millis as now so the difference is 0; 
@@ -85,6 +120,7 @@ DateTimeContainer getTime(){
   t.selectedDay = ptm->tm_mday;
   t.selectedHour = ptm->tm_hour;
   t.selectedMin = ptm->tm_min;
+  debug("getTime: currentTime="+t.toString());
   return t;
 }
 
