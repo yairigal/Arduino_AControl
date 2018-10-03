@@ -9,7 +9,7 @@
 #include <NTPClient.h>
 
 WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP, "109.226.40.40", 3600, 0);
+NTPClient timeClient(ntpUDP, "109.226.40.40", 3600 * 3, 0);
 
 unsigned long bootupUnixTime = 0;
 unsigned long secondsPassedFromBootup = 0;
@@ -37,33 +37,28 @@ void deleteActions(int upToIndex){
 }
 
 
-DateTimeContainer getUnixTimeOnline(){
-  DateTimeContainer t;
-  unsigned long currentUnix = 0;
-  do{
-    time_t now = time(NULL);
-    struct tm * ptm = gmtime(&now);
-    t.selectedYear = ptm->tm_year + 1900;
-    t.selectedMonth = ptm->tm_mon + 1;
-    t.selectedDay = ptm->tm_mday;
-    t.selectedHour = ptm->tm_hour;
-    t.selectedMin = ptm->tm_min;
-    debug("getTime: currentYear="+String(t.selectedYear));
-    currentUnix = now;
-  }while(t.selectedYear < 2018);
-  bootupUnixTime = currentUnix;
-  return t;
+
+
+unsigned long MyMillis(){
+  return millis() - startupMillis;
 }
 
-DateTimeContainer unixTimeToDateTime(unsigned long unixtime){
-  DateTimeContainer t;
-  time_t now = unixtime;
+
+DateTimeContainer getTime(){
+  debug("getTime: seconds="+String(seconds()));
+  if(seconds() > MAX_SECONDS){ // if overflow is about to occour
+    bootupUnixTime += seconds(); // startupTime is set to current time;
+    startupMillis = MyMillis(); // set startup millis as now so the difference is 0; 
+  }
+  time_t now = bootupUnixTime + seconds();
   struct tm * ptm = gmtime(&now);
+  DateTimeContainer t;
   t.selectedYear = ptm->tm_year + 1900;
   t.selectedMonth = ptm->tm_mon + 1;
   t.selectedDay = ptm->tm_mday;
   t.selectedHour = ptm->tm_hour;
   t.selectedMin = ptm->tm_min;
+  debug("getTime: currentTime="+t.toString());
   return t;
 }
 
@@ -85,7 +80,7 @@ void initTime(){
   do{
     timeClient.forceUpdate();
     bootupUnixTime = timeClient.getEpochTime();
-    current = unixTimeToDateTime(bootupUnixTime);
+    current = getTime();
     debug("bootupUnixTime="+String(bootupUnixTime));
     debug("current Time="+current.toString());
   }while(current.selectedYear < 2018);
@@ -98,31 +93,13 @@ void initTime(){
   //getUnixTimeOnline();
 }
 
-unsigned long MyMillis(){
-  return millis() - startupMillis;
-}
 
 
 
 
 
-DateTimeContainer getTime(){
-  debug("getTime: seconds="+String(seconds()));
-  if(seconds() > MAX_SECONDS){ // if overflow is about to occour
-    bootupUnixTime += seconds(); // startupTime is set to current time;
-    startupMillis = MyMillis(); // set startup millis as now so the difference is 0; 
-  }
-  time_t now = bootupUnixTime + seconds();
-  struct tm * ptm = gmtime(&now);
-  DateTimeContainer t;
-  t.selectedYear = ptm->tm_year + 1900;
-  t.selectedMonth = ptm->tm_mon + 1;
-  t.selectedDay = ptm->tm_mday;
-  t.selectedHour = ptm->tm_hour;
-  t.selectedMin = ptm->tm_min;
-  debug("getTime: currentTime="+t.toString());
-  return t;
-}
+
+
 
 
 
