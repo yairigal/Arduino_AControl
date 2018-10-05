@@ -20,6 +20,9 @@
 
 bool reconnecting = false;
 
+  
+
+
 void connectToWiFi(){
   //settingUpStaticIP();
   // setted up the static ip in the router.
@@ -43,6 +46,14 @@ void connectToWiFi(){
   lcd.print(WiFi.localIP());
   delay(3000);
 }
+
+void onDisconnected(const WiFiEventStationModeDisconnected& event){
+  Serial.println("Wifi disconnected");
+  lcd.clear();
+  lcd.print("lost connection");
+  connectToWiFi();
+}
+
 
 
 #endif

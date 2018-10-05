@@ -11,6 +11,7 @@
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "109.226.40.40", 3600 * 3, 0);
 
+
 unsigned long bootupUnixTime = 0;
 unsigned long secondsPassedFromBootup = 0;
 unsigned long startupMillis = 0;
@@ -76,7 +77,6 @@ void initTime(){
 //    delay(1000);
 //  }
   timeClient.begin();
-  DateTimeContainer current;
   do{
     timeClient.forceUpdate();
     bootupUnixTime = timeClient.getEpochTime();
@@ -105,7 +105,7 @@ void initTime(){
 
 void checkTime(){
   Serial.print("checking for time ");
-  DateTimeContainer current = getTime();
+  current = getTime();
   debug("current Time="+current.toString());
   // if its the time to do this.
   for(int i=numActions-1;i>=0;--i){

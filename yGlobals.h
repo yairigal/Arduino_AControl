@@ -2,6 +2,7 @@
 #define GLOBALS_H
 
 
+DateTimeContainer current;
 //////////AC mangmnet///////////
 //TODO delete actions, words
 FutureAction* actions; 

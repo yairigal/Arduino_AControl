@@ -29,6 +29,7 @@ void setup() {
   if(!initSDCard())
     return;
   connectToWiFi();
+  WiFi.onStationModeDisconnected(onDisconnected);
   initTime();
   readDataFromSD();
   setupServer();
@@ -40,6 +41,25 @@ void setup() {
 
 
 void loop() {
+  //WiFi.forceSleepWake();
+  if(WiFi.status() != WL_CONNECTED){
+    if(!reconnecting){
+      reconnecting = true;
+      Serial.println("WiFi disconnected, reconnecting...");
+      lcd.clear();
+      lcd.print("Reconnecting to");
+      lcd.setCursor(7,1);
+      lcd.print("WiFi");
+    }
+    WiFi.reconnect();
+    printAcDataToLCD();
+  }
+  else {
+    if(reconnecting)
+      reconnecting = false;
+    server.handleClient();
+  }
+  
   currentMillis = millis();
   if(currentMillis - prevMillis > 60000){ // 1 min
       debug("1 min passed entering checkTime()");
@@ -48,21 +68,5 @@ void loop() {
       checkTime();  
       printAcDataToLCD();
   }
-  if(WiFi.status() != WL_CONNECTED){
-    if(!reconnecting){
-      reconnecting = true;
-      Serial.println("WiFi disconnected, reconnecting...");
-      lcd.clear();
-      lcd.print("reconnecting to");
-      lcd.setCursor(4,1);
-      lcd.print("WiFi");
-    }
-    WiFi.begin(ssid, password);
-  }
-  else {
-    if(reconnecting)
-      reconnecting = false;
-    server.handleClient();
-  }
-
+  delay(1);
 }
