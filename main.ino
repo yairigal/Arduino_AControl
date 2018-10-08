@@ -23,17 +23,18 @@ unsigned long prevMillis = 0,currentMillis;
 
 void setup() {
   Serial.begin(115200);
+  initlog();
   //Serial.setDebugOutput(true);
   pinMode(outputPin,OUTPUT);
   setupLCD();
   if(!initSDCard())
     return;
   connectToWiFi();
-  WiFi.onStationModeDisconnected(onDisconnected);
+  //WiFi.onStationModeDisconnected(onDisconnected);
   initTime();
   readDataFromSD();
   setupServer();
-  Serial.println("Started Running!");
+  logln("Started Running!");
   LCDwrite("Started Running!");
   delay(1000);
   printAcDataToLCD();
@@ -45,13 +46,13 @@ void loop() {
   if(WiFi.status() != WL_CONNECTED){
     if(!reconnecting){
       reconnecting = true;
-      Serial.println("WiFi disconnected, reconnecting...");
+      logln("WiFi disconnected, reconnecting...");
       lcd.clear();
       lcd.print("Reconnecting to");
       lcd.setCursor(7,1);
       lcd.print("WiFi");
     }
-    WiFi.reconnect();
+    connectToWiFi();
     printAcDataToLCD();
   }
   else {

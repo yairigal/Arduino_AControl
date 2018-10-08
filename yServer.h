@@ -19,7 +19,7 @@ void sendDataFromRAM(){
 
 void setupServer(){
     LCDwrite("STARTING SERVER");
-    Serial.println("Setting up server");
+    logln("Setting up server");
     if (MDNS.begin("esp8266")) {
       debug("MDNS responder started");
     }

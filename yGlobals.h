@@ -1,6 +1,15 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
+// SD
+#include <SPI.h>
+#include <SD.h>
+// WIFI
+#include <ESP8266WiFi.h>
+#include <WiFiClient.h>
+#include <ESP8266mDNS.h>
+
+File root;
 
 DateTimeContainer current;
 //////////AC mangmnet///////////

@@ -72,7 +72,7 @@ void sendCodesTask(int wantedState)
       temperature = 16;
     }
     codes = getCodes(&newAc,fanStrength,acMode,temperature,changeState,acSwing);
-    Serial.println("Sending action to the AC");
+    logln("Sending action to the AC");
     irRemoteSendRaw(codes,TIMINGS_LENGTH);
     lcd.clear();
     lcd.print("=====ACTION=====");

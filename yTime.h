@@ -69,10 +69,10 @@ void initTime(){
   // gr.pool.ntp.org - 178.128.126.226, 195.167.30.249
   // time.nist.gov - 132.163.96.1
   //configTime(3 * 3600, 0, "109.226.40.40", "178.128.126.226","132.163.96.1");
-  Serial.print("\nWaiting for time");
+  log("\nWaiting for time");
   LCDwrite("Waiting for time");
 //  while (!time(nullptr)) {
-//    Serial.print(".");
+//    log(".");
 //    LCDwrite(".",true);
 //    delay(1000);
 //  }
@@ -86,7 +86,7 @@ void initTime(){
   }while(current.selectedYear < 2018);
   
   timeClient.end();
-  Serial.println("");
+  logln("");
 
   //bootupUnixTime = time(nullptr);
   //debug("current Time="+String(time(0)));
@@ -104,7 +104,7 @@ void initTime(){
 
 
 void checkTime(){
-  Serial.print("checking for time ");
+  log("checking for time ");
   current = getTime();
   debug("current Time="+current.toString());
   // if its the time to do this.
@@ -114,7 +114,7 @@ void checkTime(){
       if(current.after(topRecord) || current.equals(topRecord)){
         debug("comparing was succesful !");
         // do action
-        Serial.println("\nfound time to on/off ac, executing...("+topRecord.toString()+")");
+        logln("\nfound time to on/off ac, executing...("+topRecord.toString()+")");
         //String onoff = actions[i].on ? "on" : "off";
         //LCDwrite("===TIME FOUND===");
         //LCDwrite("Turning "+onoff);
@@ -125,7 +125,7 @@ void checkTime(){
         return;
       }
   }
-  Serial.println("..done");
+  logln("..done");
 }
 
 

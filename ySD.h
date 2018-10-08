@@ -1,12 +1,10 @@
 #ifndef SD_H
 #define SD_H
 
-#include <SPI.h>
-#include <SD.h>
+
 
 /////////////////SD/////////
 const int chipSelect = D10; // use D0 for Wemos D1 Mini
-File root;
 
 String* dataToStr(){   
     String * str = new String();
@@ -134,7 +132,7 @@ void strToParameters(String str){
     String * words = split(str,numWords);
     if(numWords < 5){
       LCDwrite("SD READ ERROR");
-      Serial.println("failed to read ac instance data");
+      logln("failed to read ac instance data");
       return;
     }
     acState = words[0].toInt();
@@ -153,7 +151,7 @@ void strToData(String buffer){
     String * lines = split(buffer,numLines,',');
     if (numLines < 1){
       LCDwrite("SD ERROR");
-      Serial.println("failed to read Data from sd");
+      logln("failed to read Data from sd");
       return;
     }
     //parse first line;
@@ -177,7 +175,7 @@ void strToData(String buffer){
 
 void readDataFromSD(){
     LCDwrite("LOADING DATA....");
-    Serial.println("Loading Data from SD card");
+    logln("Loading Data from SD card");
     if(!SD.exists("data")){
       debug("no file found");
       SD.open("data",O_CREAT).close();
@@ -200,14 +198,14 @@ void readDataFromSD(){
 
 bool initSDCard(){
   LCDwrite("INIT SD CARD....");
-  Serial.println("\r\nWaiting for SD card to initialize...");
+  logln("\r\nWaiting for SD card to initialize...");
   if (!SD.begin(chipSelect)) { // CS is D8 in this example
-    Serial.print("sd card init failed!");
+    log("sd card init failed!");
     LCDwrite("INIT FAILED",true);
     return false;
   }
   LCDwrite("INIT COMPLETED");
-  Serial.println("sd card init completed");
+  logln("sd card init completed");
   return true;
 }
 
