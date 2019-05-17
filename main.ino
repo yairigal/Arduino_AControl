@@ -44,20 +44,15 @@ void setup() {
 void loop() {
   //WiFi.forceSleepWake();
   if(WiFi.status() != WL_CONNECTED){
-    if(!reconnecting){
-      reconnecting = true;
-      logln("WiFi disconnected, reconnecting...");
-      lcd.clear();
-      lcd.print("Reconnecting to");
-      lcd.setCursor(7,1);
-      lcd.print("WiFi");
-    }
+    logln("WiFi disconnected, reconnecting...");
+    lcd.clear();
+    lcd.print("Reconnecting to");
+    lcd.setCursor(7,1);
+    lcd.print("WiFi");
     connectToWiFi();
     printAcDataToLCD();
   }
   else {
-    if(reconnecting)
-      reconnecting = false;
     server.handleClient();
   }
   

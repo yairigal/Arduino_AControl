@@ -16,8 +16,6 @@
 //}
 
 
-bool reconnecting = false;
-
   
 
 
@@ -25,6 +23,7 @@ void connectToWiFi(){
   //settingUpStaticIP();
   // setted up the static ip in the router.
   WiFi.mode(WIFI_STA);
+  WiFi.setSleepMode(WIFI_NONE_SLEEP);
   WiFi.begin(ssid, password);
   log("\nConnecting to WiFi");
   lcd.clear();
