@@ -44,13 +44,9 @@ void setup() {
 void loop() {
   //WiFi.forceSleepWake();
   if(WiFi.status() != WL_CONNECTED){
-    logln("WiFi disconnected, reconnecting...");
-    lcd.clear();
-    lcd.print("Reconnecting to");
-    lcd.setCursor(7,1);
-    lcd.print("WiFi");
-    connectToWiFi();
-    printAcDataToLCD();
+    logln("WiFi disconnected, restarting ESP");
+    writeDataToSD();
+    ESP.reset();
   }
   else {
     server.handleClient();

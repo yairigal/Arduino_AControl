@@ -23,5 +23,4 @@ int fanStrength = 4; // 1,2,3,4 - auto
 int temperature = 23; // 16 - 30
 int acMode = 1; // 1 - cool , 2 - heat
 int acSwing = 0; // not relevant for ours.
-
 #endif

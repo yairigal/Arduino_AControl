@@ -105,8 +105,9 @@ void clearFile(char * file){
 void writeDataToSD(){
   //first line is the data: state, fan, temp, mode, swing
   //second line and on is the times:on, year,month,day,hour,min
-  clearFile("data");
-  root = SD.open("data",FILE_WRITE);
+  clearFile("DATA");
+  root = SD.open("DATA",FILE_WRITE);
+  root.flush();
   root.seek(0);
   String * str = dataToStr();
   debug("writeDataToSD: str="+*str);
@@ -116,6 +117,7 @@ void writeDataToSD(){
   buffer[n-1] = '\0';
   debug("writeDataToSD: buffer="+String(buffer));
   root.print(buffer);
+  root.flush();
   if(str != NULL){
      delete str;
      str = NULL; 
@@ -131,6 +133,7 @@ void strToParameters(String str){
     int numWords;
     String * words = split(str,numWords);
     if(numWords < 5){
+      debug("data read from file is: "+str+"\nwords after split: "+*words +"\nnumWords="+String(numWords));
       LCDwrite("SD READ ERROR");
       logln("failed to read ac instance data");
       return;
@@ -176,24 +179,41 @@ void strToData(String buffer){
 void readDataFromSD(){
     LCDwrite("LOADING DATA....");
     logln("Loading Data from SD card");
-    if(!SD.exists("data")){
+    if(!SD.exists("DATA")){
       debug("no file found");
-      SD.open("data",O_CREAT).close();
+      SD.open("DATA",O_CREAT).close();
       debug("file created");
     }
     debug("file found, opening...");
-    root = SD.open("data",FILE_READ);
+    root = SD.open("DATA",FILE_READ);
+    root.flush();
     debug("file opened");
+    debug("file position="+String(root.position()));
+    debug("file size="+String(root.size()));
     root.seek(0);
     String str;
-    while(root.available())
-      str += (char)root.read(); 
+    int is_avilable;
+    while(1){
+      root.flush();
+      is_avilable = root.available();
+      debug("file avaiable="+String(is_avilable));
+      if(is_avilable == 0){
+        break;
+      }
+      debug("data before reading="+str);
+      root.flush();
+      str += (char)root.read();
+      root.flush(); 
+      debug("data after reading="+str);
+
+    }
     root.close();
     debug("readDataFromSD: done reading file");
     strToData(str);
     debug("readDataFromSD: done converting to data");
-
-    acState = 0; // always off when came back from restart.
+    if (ESP.getResetInfoPtr()->reason != 2){ // if its not sw reset
+          acState = 0; // always off when came back from unwanted restart.
+    }
 }
 
 bool initSDCard(){
